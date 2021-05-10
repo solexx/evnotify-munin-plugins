@@ -1,9 +1,6 @@
 #!/bin/bash
 # -*- bash -*-
 
-#set -x
-#set -u
-
 : << =cut
 
 =head1 NAME
@@ -45,6 +42,7 @@ GPLv2
 =cut
 
 #set -x
+#set -u
 
 akey=${akey:-}
 token=${token:-}
@@ -108,6 +106,10 @@ akey and password or token correctly?"
 		exit 0
 		;;
 esac 
+
+if [ -z "${token}" ]; then
+	token=$(login)
+fi
 
 echo "display.value $(get_soc_display)"
 echo "bms.value $(get_soc_bms)"
