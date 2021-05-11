@@ -72,6 +72,15 @@ get_soc_bms() {
 	get_soc_json | jq ".soc_bms | tonumber"
 }
 
+get_soh() {
+	if [ -z "${token}" ]; then
+		token="$(login)"
+	fi
+	curl -s "https://app.evnotify.de/extended?akey=${akey}&token=${token}" \
+		| jq '.soh'
+}
+
+
 case $1 in
 	config)
         cat <<EOF
@@ -86,6 +95,7 @@ EOF
 
 		echo "display.label SoC Display"
 		echo "bms.label SoC BMS"
+		echo "soh.label SoH"
 
         exit 0
 		;;
@@ -113,5 +123,6 @@ fi
 
 echo "display.value $(get_soc_display)"
 echo "bms.value $(get_soc_bms)"
+echo "soh.value $(get_soh)"
 
 exit 0
