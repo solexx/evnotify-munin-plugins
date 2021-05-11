@@ -1,0 +1,117 @@
+#!/bin/bash
+# -*- bash -*-
+
+: << =cut
+
+=head1 NAME
+
+evnotify_soc - Plugin to monitor voltages as reported by EVNotify
+
+=head1 CONFIGURATION
+
+You just need to set the host like this:
+
+ [evnotify_*]
+ env.akey abcdef
+ env.token abcdef01234567890abc
+
+If you do not have the token at hand, you can also configure the
+password instead:
+
+ [evnotify_*]
+ env.akey abcdef
+ env.token mysecretpassword
+
+=head1 AUTHORS
+
+=over
+
+=item 2021.05.10 Initial version by Jochen Spieker <js@wim.re>
+
+=back
+
+=head1 LICENSE
+
+GPLv2
+
+=head1 MAGIC MARKERS
+
+ #%# family=contrib
+ #%# capabilities=autoconf
+
+=cut
+
+#set -x
+#set -u
+
+akey=${akey:-}
+token=${token:-}
+password=${password:-}
+
+# login with akey and password and output API token
+login() {
+	curl -s --data '{"akey":"'${akey}'", "password":"'${password}'"}' \
+		-H "Content-Type: application/json" \
+		https://app.evnotify.de/login \
+	| jq '.token' \
+	| sed -e 's#"##g'
+}
+
+get_extended_json() {
+	if [ -z "${token}" ]; then
+		token="$(login)"
+	fi
+	curl -s "https://app.evnotify.de/extended?akey=${akey}&token=${token}"
+}
+
+get_dc_battery_voltage() {
+	get_extended_json | jq '.dc_battery_voltage'
+}
+
+get_aux_battery_voltage() {
+	get_extended_json | jq '.aux_battery_voltage'
+}
+
+case $1 in
+	config)
+        cat <<EOF
+graph_title EVNotify Voltages
+graph_args --base 1000 --lower-limit 0
+graph_vlabel V
+graph_info EVNotify Voltages
+graph_category evnotify
+graph_printf %1.1lf
+graph_data_size custom 7d, 30m for 30d, 2h for 365d, 1d for 3650d
+EOF
+
+		echo "dc_battery.label DC Battery"
+		echo "aux_battery.label AUX Battery"
+
+        exit 0
+		;;
+	autoconf)
+		if ! jq --version > /dev/null; then
+			echo "no ('jq' not found. Is it installed and in PATH?)"
+		elif [ -z "${akey}" ]; then
+			echo "akey was not configured."
+		elif [ -z "${password}" ] && [ -z "${token}" ]; then
+			echo "Neither password nor token set. You need to provide \
+either one."
+		elif [ -z "${token}" ] && ! login ; then
+			echo "Login with provided credentials failed. Have you set \
+akey and password or token correctly?"
+		else
+			echo "yes"
+		fi
+		exit 0
+		;;
+esac 
+
+if [ -z "${token}" ]; then
+	token=$(login)
+fi
+
+echo "dc_battery.value $(get_dc_battery_voltage)"
+echo "aux_battery.value $(get_aux_battery_voltage)"
+
+exit 0

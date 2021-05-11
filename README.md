@@ -7,7 +7,12 @@ These are [Munin](http://munin-monitoring.org/) plugins for monitoring
 
 ### Plugins
 
+- **evnotify_energy** Displays charged/discharged energy from BMS in kWh
+- **evnotify_odo** Displays the current mileage from the odometer
 - **evnotify_soc** Displays state of charge (display and BMS)
+- **evnotify_temp** Displays temperatures reported by the BMS
+- **evnotify_voltage** Displays AC and DC voltages
+
 
 ### Setup
 
