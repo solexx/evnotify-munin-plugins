@@ -20,7 +20,7 @@ password instead:
 
  [evnotify_*]
  env.akey abcdef
- env.token mysecretpassword
+ env.password mysecretpassword
 
 =head1 AUTHORS
 
@@ -84,7 +84,7 @@ case $1 in
 	config)
         cat <<EOF
 graph_title EVNotify Temperatures
-graph_args --base 1000 --lower-limit 0
+graph_args --base 1000
 graph_vlabel °C
 graph_info EVNotify Temepratures
 graph_category evnotify

@@ -20,7 +20,7 @@ password instead:
 
  [evnotify_*]
  env.akey abcdef
- env.token mysecretpassword
+ env.password mysecretpassword
 
 =head1 AUTHORS
 
